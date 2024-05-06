@@ -5,7 +5,7 @@ const JobCard = ({ job }) => {
   const { title, company, location, description, experience, applyLink } = job;
 
   return (
-    <Card variant="outlined" style={{ marginBottom: '20px' }}>
+    <Card variant="outlined" style={{ marginBottom: '20px' }} >
       <CardContent>
         <Typography variant="h5" component="h2" gutterBottom>
           {title}
