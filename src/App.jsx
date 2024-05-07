@@ -1,71 +1,97 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from "./components/Header"
 import JobCard from "./components/JobCard"
 import SearchBar from "./components/SearchBar"
+import './App.css'; 
 
 function App() {
   const [jobData, setJobData] = useState([]);
   const [filteredJobData, setFilteredJobData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const loader = useRef(null);
 
   useEffect(() => {
-    const fetchJobData = async () => {
-      try {
-        const response = await fetch("https://api.weekday.technology/adhoc/getSampleJdJSON", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            "limit": 10,
-            "offset": 0
-          })
-        });
-        const data = await response.json();
-        if (data && Array.isArray(data.jdList)) {
-          setJobData(data.jdList); 
-          setFilteredJobData(data.jdList); // Initialize filtered data with all jobs
-        } else {
-          console.error("Invalid API response:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching job data:", error);
-      }
-    };
-  
     fetchJobData();
   }, []);
 
-  // Function to filter job data based on provided criteria
- // Function to filter job data based on provided criteria
-const filterJobs = (criteria) => {
-  const filteredJobs = jobData.filter(job => {
-    // Assuming the criteria matches the structure of job objects
-    return Object.keys(criteria).every(key => {
-      // Check if job property exists and then apply toLowerCase
-      return !criteria[key] || (job[key] && job[key].toLowerCase().includes(criteria[key].toLowerCase()));
-    });
-  });
-  setFilteredJobData(filteredJobs);
-};
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loader.current && window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        fetchMoreData();
+      }
+    };
 
+    window.addEventListener('scroll', handleScroll);
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [offset]);
+
+  const fetchJobData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("https://api.weekday.technology/adhoc/getSampleJdJSON", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          "limit": 10,
+          "offset": offset
+        })
+      });
+      const data = await response.json();
+      if (data && Array.isArray(data.jdList)) {
+        setJobData(prevData => [...prevData, ...data.jdList]);
+        setFilteredJobData(prevData => [...prevData, ...data.jdList]);
+        setOffset(prevOffset => prevOffset + 10); // Increment offset for the next fetch
+      } else {
+        console.error("Invalid API response:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching job data:", error);
+    }
+    setIsLoading(false);
+  };
+
+  const fetchMoreData = () => {
+    if (!isLoading) {
+      fetchJobData();
+    }
+  };
+
+  const filterJobs = (criteria) => {
+    const filteredJobs = jobData.filter(job => {
+      return Object.keys(criteria).every(key => {
+        return !criteria[key] || (job[key] && job[key].toLowerCase().includes(criteria[key].toLowerCase()));
+      });
+    });
+    setFilteredJobData(filteredJobs);
+  };
 
   return (
     <div>
       <Header />
-      <SearchBar fetchJobsCustom={filterJobs} /> {/* Pass the filter function */}
-      <div>
-        {filteredJobData.length > 0 ? (
-          filteredJobData.map((job, index) => (
-            <JobCard key={index} job={job} />
-          ))
-        ) : (
-          <p>No jobs found.</p>
-        )}
+      <SearchBar fetchJobsCustom={filterJobs} />
+      <div className="job-card-container">
+        {filteredJobData.map((job, index) => (
+          <JobCard key={index} job={job} />
+        ))}
+        <div ref={loader} style={{ margin: "20px", textAlign: "center" }}>
+          {isLoading && <p>Loading...</p>}
+        </div>
       </div>
     </div>
   );
 }
 
 export default App;
+
+
+
+
+
+
+
 
