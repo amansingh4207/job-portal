@@ -47,9 +47,9 @@ function SearchBar(props) {
         </select>
         <select onChange={handleChange} name="location" value={jobCriteria.location} className='w-64 py-3 pl-4 bg-zinc-200 font-semibold rounded-md'>
             <option value="" disabled hidden>Location</option>
-            <option value="Remote">Remote</option>
-            <option value="In-Office">In-Office</option>
-            <option value="Hybrid">Hybrid</option>
+            <option value="remote">remote</option>
+            <option value="mumbai">mumbai</option>
+            <option value="banglore">banglore</option>
         </select>
         <select onChange={handleChange} name="experience" value={jobCriteria.experience} className='w-64 py-3 pl-4 bg-zinc-200 font-semibold rounded-md'>
             <option value="" disabled hidden>Experience</option>
