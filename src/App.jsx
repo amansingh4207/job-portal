@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Header from "./components/Header"
 import JobCard from "./components/JobCard"
 import SearchBar from "./components/SearchBar"
-import './App.css'; 
+import './App.css';
 
 function App() {
   const [jobData, setJobData] = useState([]);
@@ -30,8 +30,9 @@ function App() {
 
   const fetchJobData = async () => {
     setIsLoading(true);
+    const apiURL = import.meta.env.VITE_API_KEY;
     try {
-      const response = await fetch("https://api.weekday.technology/adhoc/getSampleJdJSON", {
+      const response = await fetch(apiURL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -74,7 +75,7 @@ function App() {
     <div>
       <Header />
       <SearchBar fetchJobsCustom={filterJobs} />
-      <div className="job-card-container">
+      <div className="job-card-container mx-5">
         {filteredJobData.map((job, index) => (
           <JobCard key={index} job={job} />
         ))}
