@@ -31,6 +31,14 @@ function App() {
   const fetchJobData = async () => {
     setIsLoading(true);
     const apiURL = import.meta.env.VITE_API_KEY;
+
+    if (!apiURL) {
+      console.error("API URL is not defined");
+      setIsLoading(false);
+      return;
+    }
+
+
     try {
       const response = await fetch(apiURL, {
         method: "POST",
